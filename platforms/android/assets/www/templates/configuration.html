@@ -1,3 +1,18 @@
-<ion-view title="Configuration" id="page4">
-    <ion-content padding="true" class="has-header"></ion-content>
+<ion-view title="Configuration" id="page4" ng-controller="configurationCtrl as conf">
+    <ion-content padding="true" class="has-header">
+        <div id="deviceInfo-markdown3" style="color:#000000;">
+            <p>
+                <strong>senderID</strong>
+            </p>
+        </div>
+        <form id="deviceInfo-form2" class="list ">
+            <label class="item item-input " id="deviceInfo-input2" name="senderID">
+                <input ng-model="conf.senderID" type="text">                
+            </label>
+
+        </form>
+        <div id="configuration-button-bar1" class=" button-bar ">
+            <button id="configuration-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="conf.registerConfiguration()">Register</button>
+        </div>
+    </ion-content>
 </ion-view>
