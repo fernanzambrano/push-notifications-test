@@ -5,9 +5,11 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives','app.services', ])
+angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives','app.services' ])
 
-.run(function($ionicPlatform) {
+
+
+.run(function($ionicPlatform, SecurityService) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -22,18 +24,41 @@ angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives
 
     setupPush();
 
+    //var access_token = SecurityService.getToken();
+
   });
 })
 
-this.setupPush = function () {
-  if (localStorage.senderID == '[object Object]') {
-    //localStorage.senderID = "918469035747";  
-    localStorage.senderID = "";
+
+
+this.setupPush = function() {
+
+localStorage.senderID = "281258853994"; 
+  if (localStorage.senderID == '[object Object]' || localStorage.senderID == 'undefined') {
+    localStorage.senderID = "281258853994";  
+    //localStorage.senderID = "";
   }  
 
-  if (localStorage.notifications == '[object Object]') {
+localStorage.notifications = "[]";
+  if (localStorage.notifications == '[object Object]' || localStorage.notifications == 'undefined') {
     localStorage.notifications = "[]";
   }
+
+  console.log("FZG ********* antes de asignar por defecto localStorage.registrationId.");
+  if (localStorage.registrationId == '[object Object]' || localStorage.registrationId == 'undefined') {
+    localStorage.registrationId = "";
+  }
+
+  console.log("FZG ********* antes de asignar por defecto localStorage.currentRegistrationId.");
+  if (localStorage.currentRegistrationId == '[object Object]' || localStorage.currentRegistrationId == 'undefined') {
+    localStorage.currentRegistrationId = "";
+  }  
+
+  console.log("FZG ********* despues de asignar por defecto localStorage.registrationId.");
+  console.log("FZG ********* valor despues de asignar:"+ localStorage.registrationId);
+
+  console.log("FZG ********* despues de asignar por defecto localStorage.currentRegistrationId.");
+  console.log("FZG ********* valor despues de asignar:"+ localStorage.currentRegistrationId);
 
   var push = PushNotification.init({
      "android": {
@@ -47,51 +72,45 @@ this.setupPush = function () {
      "windows": {}
   });
 
-
   push.on('registration', function(data) {
-     console.log("registration event: " + data.registrationId);
-     var oldRegId = localStorage.registrationId;
-     if (oldRegId !== data.registrationId) {
-         // Save new registration ID
-         localStorage.registrationId = data.registrationId;
-         // Post registrationId to your app server as the value has changed
-         console.log("a new regID has been archived");
-     }
+
+    localStorage.registrationId = data.registrationId;
+    if (localStorage.currentRegistrationId !== localStorage.registrationId) {
+       //localStorage.currentRegistrationId = localStorage.registrationId;
+    };
+     
+
   });
 
   push.on('notification', function(data) {
-         console.log("notification event");
+    console.log("notification event");
 
-         var notifications = [];
+    var notifications = [];
 
-         if (localStorage.notifications != '[object Object]') {
-         //   console.log("FZG ********** recuperando desde localStorage");
-            notifications = JSON.parse(localStorage.notifications);
+    if (localStorage.notifications != '[object Object]') {
+      notifications = JSON.parse(localStorage.notifications);
+    }
 
-            //$scope.notifications.push(JSON.stringify(notification.alert));
-         }
+    var notification = {};
 
-         var notification = {};
+    notification.time = Date.now();
+    notification.message = data.message;
+    notification.title = data.title;
 
-         notification.time = Date.now();
-         notification.message = data.message;
-         notification.title = data.title;
+    notifications.push(notification);
 
-         notifications.push(notification);
+    localStorage.notifications = JSON.stringify(notifications);
 
-         localStorage.notifications = JSON.stringify(notifications);
+    locationMedia = "";
+    if (device.platform == "Android"){
+      locationMedia = "/android_asset";
+    }
+    locationMedia = locationMedia + "/www/sound/beep.wav";
 
-         locationMedia = "";
-         if (device.platform == "Android"){
-            locationMedia = "/android_asset";
-         }
-         locationMedia = locationMedia + "/www/sound/beep.wav";
+    playSound(locationMedia);
 
-         playSound(locationMedia);
-
-         window.plugins.toast.showShortTop('A new notification has been received.');
-
-     }); 
+    window.plugins.toast.showShortTop('A new notification has been received.');
+  }); 
 
   push.on('error', function(e) {
      console.log("push error during setup  = " + e.message);
@@ -112,6 +131,13 @@ this.playSound = function(mediaFile) {
   // Play audio
   my_media.play();
 };
+
+
+
+
+
+
+
 
 
 
