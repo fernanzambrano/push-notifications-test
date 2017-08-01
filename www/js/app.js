@@ -1,15 +1,13 @@
 // Ionic Starter App
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
+// 'app' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-// 'starter.services' is found in services.js
-// 'starter.controllers' is found in controllers.js
+// 'app.services' is found in services.js
+// 'app.controllers' is found in controllers.js
 angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives','app.services' ])
 
-
-
-.run(function($ionicPlatform, SecurityService) {
+.run(function($ionicPlatform, SecurityService, DevicesExtManagerService) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -22,43 +20,31 @@ angular.module('app', ['ionic', 'app.controllers', 'app.routes', 'app.directives
       StatusBar.styleDefault();
     }
 
-    setupPush();
-
-    //var access_token = SecurityService.getToken();
-
+    initLocalStorage();
+    setup(SecurityService, DevicesExtManagerService);
   });
 })
 
+this.senderID = "";
+this.securityEndPoint = "https://nakatomi.gsnetcloud.com/token";
+this.securityCredentials = "";
+this.deviceEndPoint = "https://nakatomi.gsnetcloud.com/push-public/api/1/devices";
 
+this.setup = function(SecurityService, DevicesExtManagerService) {
+  SecurityService.init(securityEndPoint, securityCredentials);
 
-this.setupPush = function() {
+  SecurityService
+    .searchToken()
+    .then(function(response) { 
+      setupPush(DevicesExtManagerService);                   
+    })
+    .catch(function(err) {
+      console.log("ERROR - Setting up app - status: "+ err.status + " data: "+ err.data);
+    });
+};
 
-localStorage.senderID = "281258853994"; 
-  if (localStorage.senderID == '[object Object]' || localStorage.senderID == 'undefined') {
-    localStorage.senderID = "281258853994";  
-    //localStorage.senderID = "";
-  }  
-
-localStorage.notifications = "[]";
-  if (localStorage.notifications == '[object Object]' || localStorage.notifications == 'undefined') {
-    localStorage.notifications = "[]";
-  }
-
-  console.log("FZG ********* antes de asignar por defecto localStorage.registrationId.");
-  if (localStorage.registrationId == '[object Object]' || localStorage.registrationId == 'undefined') {
-    localStorage.registrationId = "";
-  }
-
-  console.log("FZG ********* antes de asignar por defecto localStorage.currentRegistrationId.");
-  if (localStorage.currentRegistrationId == '[object Object]' || localStorage.currentRegistrationId == 'undefined') {
-    localStorage.currentRegistrationId = "";
-  }  
-
-  console.log("FZG ********* despues de asignar por defecto localStorage.registrationId.");
-  console.log("FZG ********* valor despues de asignar:"+ localStorage.registrationId);
-
-  console.log("FZG ********* despues de asignar por defecto localStorage.currentRegistrationId.");
-  console.log("FZG ********* valor despues de asignar:"+ localStorage.currentRegistrationId);
+this.setupPush = function(DevicesExtManagerService) {
+  DevicesExtManagerService.init(deviceEndPoint);  
 
   var push = PushNotification.init({
      "android": {
@@ -73,23 +59,41 @@ localStorage.notifications = "[]";
   });
 
   push.on('registration', function(data) {
-
-    localStorage.registrationId = data.registrationId;
-    if (localStorage.currentRegistrationId !== localStorage.registrationId) {
-       //localStorage.currentRegistrationId = localStorage.registrationId;
-    };
-     
-
+    localStorage.newRegistrationId = data.registrationId;
+    if (localStorage.newRegistrationId != localStorage.registrationId) {
+      if (localStorage.deviceId == "") { //Register in push-public service. First time.
+        if (localStorage.uid != "" && localStorage.mail != "") { //If the device has uid and email
+          DevicesExtManagerService
+            .register(device.platform.toLowerCase(), localStorage.newRegistrationId, localStorage.uid, localStorage.mail)
+            .then(function(response) {
+              localStorage.registrationId = localStorage.newRegistrationId;
+              localStorage.deviceId = response.deviceId;
+            })
+            .catch(function(err) {
+              console.log("ERROR - Setting up app - registering device - status: "+ err.status + " data: "+ err.data);
+            });
+        }
+      } else { //Update registrationId in push-public service.
+        DevicesExtManagerService
+          .updatePartial(localStorage.deviceId, localStorage.newRegistrationId)
+          .then(function(response) {        
+            localStorage.registrationId = localStorage.newRegistrationId;
+          })
+          .catch(function(err) {
+            console.log("ERROR - Setting up app - updating device - status: "+ err.status + " data: "+ err.data);
+          });
+      }
+    }    
   });
-
+     
   push.on('notification', function(data) {
     console.log("notification event");
 
-    var notifications = [];
+    var notifications = JSON.parse(localStorage.notifications);
 
-    if (localStorage.notifications != '[object Object]') {
-      notifications = JSON.parse(localStorage.notifications);
-    }
+    //if (localStorage.notifications != '[object Object]') {
+    //  notifications = JSON.parse(localStorage.notifications);
+    //}
 
     var notification = {};
 
@@ -117,6 +121,32 @@ localStorage.notifications = "[]";
   });
 };
 
+this.initLocalStorage = function() {
+  if (localStorage.senderID == undefined) {
+    localStorage.senderID = senderID;  
+  }
+
+  if (localStorage.registrationId == undefined) {
+    localStorage.registrationId = "";
+  }
+
+  if (localStorage.newRegistrationId == undefined) {
+    localStorage.newRegistrationId = "";
+  }
+
+  if (localStorage.deviceId == undefined) {
+    localStorage.deviceId = "";
+  }
+
+  if (localStorage.uid == undefined) {
+    localStorage.uid = "";
+  }  
+
+  if (localStorage.mail == undefined) {
+    localStorage.mail = "";
+  }   
+};
+
 this.playSound = function(mediaFile) {
   var my_media = new Media(mediaFile,
     // success callback
@@ -131,15 +161,3 @@ this.playSound = function(mediaFile) {
   // Play audio
   my_media.play();
 };
-
-
-
-
-
-
-
-
-
-
-
-

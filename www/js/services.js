@@ -1,36 +1,33 @@
 angular.module('app.services', [])
-.factory('SecurityService', function($http) {
+.factory('SecurityService', function($http, $q) {
+	var url;
+	var credentials;
 
 	var access_token = "";
-	var interfaz = {
+	var service = {
+		init: init,
 		getToken: getToken,
-		forceSearchToken: forceSearchToken
+		searchToken: searchToken
 	}
 
-	return interfaz;
+	return service;
 
-	function forceSearchToken() {
-		acces_token = "";
-		searchToken();
-		while (access_token == ""); //waiting
-		return access_token;
+	function init(securityEndPoint, securityCredentials) {
+		url = securityEndPoint;
+		credentials = securityCredentials;		
 	}
 
 	function getToken() {
-		if (access_token != "") {
-			return access_token;
-		} else {
-			searchToken();
-			return access_token;
-		}		
+		return access_token;		
 	}
 
 	function searchToken() {
-		var url = "https://nakatomi.gsnetcloud.com/token";
-		var credentials = "Basic SU82TDgyVWZSQTlyck54bDlJcFpnU2REQWxFYTpRYU1MSTBuek5PTFJ6aDRkaEhoTjZTUzZMeVVh";
+		var defered = $q.defer();
+        var promise = defered.promise;	
+
 		var config = {
 			headers: {
-		    	'Authorization': credentials,
+		    	'Authorization': 'Basic '+ credentials,
 		    	'Content-Type': 'application/x-www-form-urlencoded'
 		    },
 		    timeout: 20000
@@ -39,108 +36,168 @@ angular.module('app.services', [])
 
 		$http.post(url, data, config)
 		.success(function (data, status, headers, config) {
+			console.log("SUCCESS - Getting token - status: "+ status + " data: "+ JSON.stringify(data));
+
+			var response = {};
 	    	if (status == 200) {
-	      		access_token = data.access_token;	      
+	      		access_token = data.access_token;
+	      		response.acces_token = data.access_token;	      
 	    	}
-	    	console.log("SUCCESS - status: "+ status + " data: "+ JSON.stringify(data));
+	    	defered.resolve(response);
+
 	  	})
 	  	.error(function (data, status, headers, config) {
 			console.log("ERROR - Getting token - status: "+ status + " data: "+ JSON.stringify(data));
+
+			var err = {};
+			err.status = status;
+			err.data = JSON.stringify(data);
+			defered.reject(err);			
 	  	});
+
+	  	return promise;
 	}
 })
 
+.factory('DevicesExtManagerService', function($http, $q, SecurityService) {
+	var service = {
+		init: init,
+		register: register,
+		updatePartial: updatePartial,
+		unregister: unregister
+	}
 
+	return service;
 
+	function init(deviceEndPoint) {
+		url = deviceEndPoint;	
+	}
 
+	function register(platform, registrationId, uid, email) {
+        var defered = $q.defer();
+        var promise = defered.promise;		
 
+		acces_token = SecurityService.getToken();
 
+		var credentials = "Bearer "+ acces_token;
+		var config = {
+			headers: {
+	 	        'Authorization': credentials,
+ 		        'Content-Type': 'application/json',
+ 	    	    'Accept': 'application/json'		    	
+		    },
+		    timeout: 20000
+		}
+		var data = {};
+		data.platform = platform;
+		data.registerId = registrationId;
+		data.uid = uid;
+		data.email = email;
 
+		$http.post(url, data, config)
+		.success(function (data, status, headers, config) {
+	    	console.log("SUCCESS - registering device - status: "+ status + " data: "+ JSON.stringify(data));
 
-// .service('DevicesExtManagerService', [DevicesExtManagerService])
+	    	var response = {};
+	    	if (status == 201) {
+	    		response.deviceId = data.deviceId;
+	    		response.platform = data.platform;
+	    		response.applicationId = data.applicationId;   
+	    	}
+	    	defered.resolve(response);	    	
+	  	})
+	  	.error(function (data, status, headers, config) {
+			console.log("ERROR - registering device - status: "+ status + " data: "+ JSON.stringify(data));
 
+			var err = {};
+			err.status = status;
+			err.data = JSON.stringify(data);
+			err.code = data.code;
+			err.message = data.message;
+			defered.reject(err);
+	  	});
 
-// var DevicesExtManagerService = function($http) {
-//   this.$http = $http;
-//   this.urlDeviceManager = 'https://nakatomi.gsnetcloud.com/push-public';
-// };
-// DevicesExtManagerService.$inject = ['$http'];
-// DevicesExtManagerService.prototype.register = function(acces_token, platform, registrationId, uid, email ) {
+	  	return promise;
+	};
 
-// 	var url = this.urlDeviceManager + '/api/1/devices';
+	function updatePartial(deviceId, registrationId) {
+        var defered = $q.defer();
+        var promise = defered.promise;		
 
-// 	var config = {
-// 	    headers : {
-// 	        'Authorization': 'Bearer ' + acces_token,
-// 	        'Content-Type': 'application/json',
-// 	        'Accept': 'application/json'
-// 	    }
-// 	}
+		acces_token = SecurityService.getToken();
 
-// 	var data = {};
-// 	data.platform = platform;
-// 	data.registerId = registrationId;
-// 	data.uid = uid;
-// 	data.email = email;
+		var urlToUpdate = url + "/" + deviceId;
+		var credentials = "Bearer "+ acces_token;
+		var config = {
+			headers: {
+	 	        'Authorization': credentials,
+	 	        'Content-Type': 'application/json',
+	 	        'Accept': '*/*'		    	
+		    },
+		    timeout: 20000
+		}
+	 	var data = {};
+	 	data.registerId = registrationId;
 
-// 	var response = {};
+		$http.patch(urlToUpdate, data, config)
+		.success(function (data, status, headers, config) {
+	    	console.log("SUCCESS - partial updating device - status: "+ status);
 
-// 	this.$http.post(url, data, config)
-// 	.success(function (data, status, headers, config) {
+	    	var response = {};
+			response.status = status;
 
-// 		response.detailedResponse = getDetailResponse(data, status, header, config);
+	    	defered.resolve(response);	    	
+	  	})
+	  	.error(function (data, status, headers, config) {
+			console.log("ERROR - partial updating device - status: "+ status + " data: "+ JSON.stringify(data));
 
-// 		response.status = status;
-// 		if (status == 201) {
-// 			response.applicationId = data.applicationId;
-// 			response.deviceId = data.deviceId;
-// 			response.platform = data.platform;
-// 		} else {
-// 			response.code = data.code;
-// 			response.message = data.message;
-// 		}
-// 	})
-// 	.error(function (data, status, header, config) {
-// 		response.detailedResponse = getDetailResponse(data, status, header, config);
-// 	});
+			var err = {};
+			err.status = status;
+			err.data = JSON.stringify(data);
+			err.code = data.code;
+			err.message = data.message;
+			defered.reject(err);
+	  	});
 
-// 	return response;	
+	  	return promise;
+	};
 
-// };
+	function unregister(deviceId) {
+        var defered = $q.defer();
+        var promise = defered.promise;		
 
-// DevicesExtManagerService.prototype.update = function(acces_token, deviceId, registrationId ) {
+		acces_token = SecurityService.getToken();
 
-// 	var url = this.urlDeviceManager + '/api/1/devices/' + deviceId;
+		var urlToDelete = url + "/" + deviceId;
+		var credentials = "Bearer "+ acces_token;
+		var config = {
+			headers: {
+	 	        'Authorization': credentials,
+	 	        'Accept': '*/*'		    	
+		    },
+		    timeout: 20000
+		}
 
-// 	var config = {
-// 	    headers : {
-// 	        'Authorization': 'Bearer ' + acces_token,
-// 	        'Content-Type': 'application/json',
-// 	        'Accept': '*/*'
-// 	    }
-// 	}
+		$http.delete(urlToDelete, config)
+		.success(function (data, status, headers, config) {
+	    	console.log("SUCCESS - unregistering device - status: "+ status);
 
-// 	var data = {};
-// 	data.registerId = registrationId;
+	    	var response = {};
+			response.status = status;
 
-// 	var response = {};
+	    	defered.resolve(response);	    	
+	  	})
+	  	.error(function (data, status, headers, config) {
+			console.log("ERROR - unregistering device - status: "+ status + " data: "+ JSON.stringify(data));
 
-// 	this.$http.patch(url, data, config)
-// 	.success(function (data, status, headers, config) {
+			var err = {};
+			err.status = status;
+			err.data = JSON.stringify(data);
+			err.code = data.code;
+			err.message = data.message;
+			defered.reject(err);
+	  	});
 
-// 		response.detailedResponse = getDetailResponse(data, status, header, config);
-
-// 		response.status = status;
-// 		if (status != 204) {
-// 			response.code = data.code;
-// 			response.message = data.message;
-// 		}
-// 	})
-// 	.error(function (data, status, header, config) {
-// 		response.detailedResponse = getDetailResponse(data, status, header, config);
-// 	});
-
-// 	return response;	
-
-// };
-
+	  	return promise;
+	};
+})
