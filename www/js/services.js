@@ -1,4 +1,5 @@
 angular.module('app.services', [])
+
 .factory('SecurityService', function($http, $q) {
 	var url;
 	var credentials;

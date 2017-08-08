@@ -1,0 +1,21 @@
+<ion-view title="Detail" id="page5" ng-controller="detailCtrl as detailNotification">
+    <ion-content padding="true" class="has-header">
+        <div style="color:#000000;">
+            <p><strong>Time</strong></p>
+        </div>
+        <div style="color:#000000;">
+            <p style="margin-top:0px;color:#000000;">{{detailNotification.notification.time}}</p>
+        </div>
+
+        <div style="color:#000000;">
+            <p><strong>Message</strong></p>
+        </div>
+        <div style="color:#000000;">
+            <p style="margin-top:0px;color:#000000;">{{detailNotification.notification.message}}</p>
+        </div>  
+
+        <div class=" button-bar ">
+            <button style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-arrow-back " ng-click="detailNotification.back()">Back</button>          
+        </div>
+    </ion-content>
+</ion-view>

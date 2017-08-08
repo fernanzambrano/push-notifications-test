@@ -29,6 +29,7 @@
             "PACKAGE_NAME": "com.fernanzambrano.pushnotification"
         },
         "phonegap-plugin-push": {
+            "SENDER_ID": "SENDER_ID",
             "PACKAGE_NAME": "com.fernanzambrano.pushnotification"
         }
     },

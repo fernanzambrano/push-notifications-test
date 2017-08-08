@@ -1,6 +1,5 @@
 <ion-view title="Device Info" id="page3" ng-controller="deviceInfoCtrl as deviceInf">
     <ion-content padding="true" class="has-header">
-
         <div id="deviceInfo-markdown3" style="color:#000000;">
             <p>
                 <strong>Platform</strong>
@@ -11,7 +10,6 @@
                 <textarea readonly rows="1">{{deviceInf.platform}}</textarea>                
             </label>
         </form>
-
 
         <div id="deviceInfo-markdown3" style="color:#000000;">
             <p>
@@ -24,7 +22,7 @@
             </label>
         </form>
 
-       <div id="deviceInfo-markdown3" style="color:#000000;">
+        <div id="deviceInfo-markdown3" style="color:#000000;">
             <p>
                 <strong>DeviceId</strong>
             </p>
@@ -35,13 +33,10 @@
             </label>
         </form>        
 
-
         <div id="deviceInfo-button-bar1" class=" button-bar ">
+            <button id="deviceInfo-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-delete " ng-click="deviceInf.unRegisterDevice()">Unregister</button>  
             <button id="deviceInfo-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="deviceInf.registerDevice()">Register</button>
-
-           <button id="deviceInfo-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="deviceInf.updatePartialDevice()">Update</button>            
-
-            <button id="deviceInfo-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="deviceInf.unRegisterDevice()">Unregister</button>            
+            <button id="deviceInfo-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="deviceInf.updatePartialDevice()">Update</button>
         </div>
     </ion-content>
 </ion-view>

@@ -43,6 +43,13 @@ $stateProvider
     abstract:true
   })
 
+  .state('detailNotification', {
+    cache: false,
+    url: '/detailnotification',
+    templateUrl: 'templates/detailNotification.html',
+   controller: 'detailCtrl'
+  })  
+
 $urlRouterProvider.otherwise('/page1/pagelistnotifications')
 
   

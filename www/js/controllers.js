@@ -6,21 +6,29 @@ angular.module('app.controllers', [])
 // TIP: Access Route Parameters for your page via $stateParams.parameterName
 function ($scope, $stateParams) {
 
-  if (localStorage.notifications == undefined) {
-    localStorage.notifications = "[]";
-  }
-
-		console.log("FZG **********"+ localStorage.notifications);
+		if (localStorage.notifications == undefined) {
+			localStorage.notifications = "[]";
+		}
 
 		this.listnot = JSON.parse(localStorage.notifications);
 
-		setInterval(function(){ document.getElementById('listnot-button1').click(); }, 3000);
+		setInterval(function() { document.getElementById('listnot-refresh').click(); }, 3000);
 
-		this.refreshNotifications = function () {
+		this.showNotification = function(notification) {
+			localStorage.notification = JSON.stringify(notification);
+			window.location.assign("#/detailnotification");
+		};
+
+		this.deleteNotification = function(notification) {
+			this.listnot.splice(this.listnot.indexOf(notification), 1);
+			localStorage.notifications = JSON.stringify(this.listnot);
+		}; 		
+
+		this.refreshNotifications = function() {
 			this.listnot = JSON.parse(localStorage.notifications);
 		};
 
-		this.deleteNotifications = function () {
+		this.deleteNotifications = function() {
 
           navigator.notification.confirm(
               'You are going to delete all notifications. Are you sure?', // message
@@ -66,6 +74,18 @@ function ($scope, $stateParams) {
 	};
 }])
 
+.controller('detailCtrl', ['$scope', '$stateParams', 
+// The following is the constructor function for this page's controller. See https://docs.angularjs.org/guide/controller
+// You can include any angular dependencies as parameters for this function
+// TIP: Access Route Parameters for your page via $stateParams.parameterName
+function ($scope, $stateParams) {
+	this.notification = JSON.parse(localStorage.notification);
+
+	this.back = function() {
+		window.history.back();
+	};
+}])
+
 function deviceInfoCtrl($scope, $stateParams, DevicesExtManagerService, SecurityService) {	
 	this.regID = localStorage.registrationId;
 	this.platform = device.platform;
@@ -77,7 +97,7 @@ function deviceInfoCtrl($scope, $stateParams, DevicesExtManagerService, Security
 			.then(function(response) {
 				localStorage.deviceId = response.deviceId;
 				window.plugins.toast.showShortBottom("Device registered with deviceId: "+ response.deviceId);
-				
+
 				$scope.deviceInf.deviceId = response.deviceId; 
 			})
 			.catch(function(err) {

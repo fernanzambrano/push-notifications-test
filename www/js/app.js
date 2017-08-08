@@ -48,7 +48,8 @@ this.setupPush = function(DevicesExtManagerService) {
 
   var push = PushNotification.init({
      "android": {
-         "senderID": localStorage.senderID
+         "senderID": localStorage.senderID,
+         "clearNotifications": false
      },
      "ios": {
        "sound": true,
@@ -88,16 +89,12 @@ this.setupPush = function(DevicesExtManagerService) {
      
   push.on('notification', function(data) {
     console.log("notification event");
+    console.log("FZG data notification:"+ JSON.stringify(data));
 
-    var notifications = JSON.parse(localStorage.notifications);
-
-    //if (localStorage.notifications != '[object Object]') {
-    //  notifications = JSON.parse(localStorage.notifications);
-    //}
-
+    var notifications = notifications = JSON.parse(localStorage.notifications);
     var notification = {};
 
-    notification.time = Date.now();
+    notification.time = new Date().toUTCString();
     notification.message = data.message;
     notification.title = data.title;
 

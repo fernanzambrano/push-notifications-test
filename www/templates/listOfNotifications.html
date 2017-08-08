@@ -1,22 +1,15 @@
-<ion-view title="List of Notifications" id="page2" ng-controller="listOfNotificationsCtrl as listNot">
-    <ion-content padding="true" class="has-header">
-        <div id="listOfNotifications-markdown1" style="color:#000000;text-align:justify;">
-            <p>Here you can find the last received notifications.</p>
-        </div>
-        <ion-list id="listOfNotifications-list1">
-            <ion-item class="item-divider " id="listOfNotifications-list-item-divider1">Notifications</ion-item>
-            <ion-item>{{listNot.listnot.length}}
-
-
-<button id="listnot-button2" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="listNot.deleteNotifications()">Delete</button>
-            <button id="listnot-button1" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="listNot.refreshNotifications()">Refresh</button> 
-
-
+<ion-view id="page2" title="Notifications" ng-controller="listOfNotificationsCtrl as listNot">
+    <ion-content padding="false" class="has-header">
+        <ion-list class="list">
+            <ion-item ng-repeat="notification in listNot.listnot" class="item-button-right item-icon-right" >
+                <p style="margin-top:0px;color:#000000;">{{notification.time}}</p>
+                <p style="margin-top:0px;color:#000000;">{{notification.message}}</p>
+                <i class="icon ion-android-arrow-forward" ng-click="listNot.showNotification(notification)"></i>
+                <ion-option-button class="button-assertive" ng-click="listNot.deleteNotification(notification)">Delete
+                </option-button>
             </ion-item>
-                       
-        </ion-list>
-        <ion-list id="listOfNotifications-list2">
-            <ion-item ng-repeat="notification in listNot.listnot" type="item-content">{{notification.message}}</ion-item>
-        </ion-list>
+        </ion-list>                 
     </ion-content>
+
+    <button ng-hide="true" id="listnot-refresh" style="border-radius:1px 1px 1px 1px;" class=" button button-positive  button-block icon-left ion-android-create " ng-click="listNot.refreshNotifications()">Refresh</button>     
 </ion-view>
