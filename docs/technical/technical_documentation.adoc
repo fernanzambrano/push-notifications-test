@@ -1,0 +1,77 @@
+= * Health Collector APP - Technical documentation *
+ <SaaS Team>
+:toc:
+
+== Introduction
+
+The health collector service runs periodically health checks over a group of services. The system extract the current health and saves inside a storage.
+If a services changes its status then an alarm is triggered. There are several channels to be used in sending alarms (sms, push). This hybrid app can receive
+the push notifications sent by the collector service.
+
+== Architecture
+
+The application follows the architecture of an Apache Cordova application. More info in https://cordova.apache.org/docs/en/latest/guide/overview/index.html[Cordova Overview]
+
+Inside path www you can find all the code source that implements the features of the application. The framework used to develop the web application is AngularJS 1.x.
+
+=== Folders
+
+**css:** You can find the css style files.
+
+**img:** Icons and images.
+
+**lib:** The app use several UI components of Ionic. All of these are inside this folder.
+
+**sounds:** media files with sounds.
+
+**templates:** The different views of the app.
+
+**js:** All the javascript files.
+
+=== JS components
+
+**app.js:** Include the initial configuration of the app. Mainly, push notification plugin setup. The localStorage is initialized in this file.
+
+**services.js:** Two service are implemented. SecurityService and DevicesExtManagerService.
+
+-SecurityService: It is the responsible of obtain the token jobs that will be necessary to access to external service like DevicesExtManagerService.
+
+-DevicesExtManagerService: It is the component that provide operations to manage devices: register, unregister and update regId value for an existing device.
+
+**controllers.js:** The controllers of the application. Responsible of integrate the views with the models and business logic.
+
+**routers.js:** Define the routes of different views. 
+
+== Software dependencies
+
+.Dependecies
+[width="50%",cols=">s,^m",frame="topbot",options="header"]
+|==========================
+|Project name |URL
+|cordova-plugin-console|http://cordova.apache.org/docs/en/7.x/reference/cordova-plugin-console/index.html#page-toc-source
+|cordova-plugin-device|http://cordova.apache.org/docs/en/7.x/reference/cordova-plugin-device/index.html#page-toc-source
+|cordova-plugin-dialogs|http://cordova.apache.org/docs/en/7.x/reference/cordova-plugin-dialogs/index.html#page-toc-source
+|cordova-plugin-file|http://cordova.apache.org/docs/en/7.x/reference/cordova-plugin-file/index.html
+|cordova-plugin-media|http://cordova.apache.org/docs/en/7.x/reference/cordova-plugin-media/index.html#page-toc-source
+|cordova-plugin-whitelist|http://cordova.apache.org/docs/en/7.x/reference/cordova-plugin-whitelist/index.html#page-toc-source
+|cordova-plugin-x-toast|https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin.git
+|phonegap-plugin-push|https://github.com/phonegap/phonegap-plugin-push/
+|==========================
+
+== External resources.
+
+=== Push Public service
+
+Health Collector APP has been integrated with push public service using the publish documentation in API Store https://apimgt.cloud.corp/store/apis/info?name=Push-public&version=v1&provider=admin[Push Public API]
+
+== Configuration
+
+Inside file app.js you have to fix the values for the variables *senderID* and *securityCredentials*.
+
+senderID is the identifier of the project in https://console.firebase.google.com/project/app-alarms/settings/general/android:com.santander.produban.alarms[Firebase console] you can find this value.
+
+securityCredentials is the data that the SecurityService needs to get access tokens. This variable is equals to Base64(consumer-key:consumer-secret) where consumer-key and
+consumer-secret are values provided by the API Manager that publish the Push public API.
+
+
+
