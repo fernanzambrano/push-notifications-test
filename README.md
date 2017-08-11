@@ -1,10 +1,8 @@
-# Health Collector App
+# Push Notification Test APP
 
 ## Introduction
 
-The health collector service runs periodically health checks over a group of services. The system extract the current health and saves inside a storage.
-If a services changes its status then an alarm is triggered. There are several channels to be used in sending alarms (sms, push). This hybrid app can receive
-the push notifications sent by the collector service.
+TODO
 
 This is a hybrid application developed using Cordova. To undestand what Cordova is take a look to this little [tutorial](https://expocodetech.com/apache-cordova-primeros-pasos/) 
 
@@ -64,11 +62,11 @@ include in PATH environment variable the path where the gradle execute file is
 
 PATH=[PATH];C:\Gradle\gradle-4.1\bin
 
-Clone this repository in a working directory. Then you need the file google-services.json (you can get it from [Firebase Console Development](https://console.firebase.google.com/project/app-alarms/settings/general/android:com.santander.produban.alarms)). Copy the file in root project directory.
+Clone this repository in a working directory. Then you need the file google-services.json (you can get it from [Firebase Console Development](https://console.firebase.google.com/project/......)). Copy the file in root project directory.
 
 Inside file app.js you have to fix the values for the variables *senderID* and *securityCredentials*.
 
-senderID is the identifier of the project in [Firebase Console Development](https://console.firebase.google.com/project/app-alarms/settings/general/android:com.santander.produban.alarms) you can find this value.
+senderID is the identifier of the project in [Firebase Console Development](https://console.firebase.google.com/project/......) you can find this value.
 
 securityCredentials is the data that the SecurityService needs to get access tokens. This variable is equals to Base64(consumer-key:consumer-secret) where consumer-key and
 consumer-secret are values provided by the API Manager that publish the Push public API.
